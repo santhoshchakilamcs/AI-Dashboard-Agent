@@ -84,6 +84,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [charts, setCharts] = useState([]);
+  const chartRefs = useRef({}); // chart id -> ECharts instance, for Save PNG
   const [kpis, setKpis] = useState([]);
   const [view, setView] = useState('upload'); // upload, explore, dashboard
   const [query, setQuery] = useState('');
@@ -1585,6 +1586,18 @@ const App = () => {
     setCharts(prev => prev.filter(chart => chart.id !== chartId));
   };
 
+  // Save a chart as a PNG, using its ECharts instance.
+  // Requires the chart to have rendered once (onChartReady below).
+  const downloadChartAsPNG = (chartId) => {
+    const instance = chartRefs.current[chartId];
+    if (!instance) return;
+    const url = instance.getDataURL({ type: 'png', pixelRatio: 2, backgroundColor: '#ffffff' });
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${chartId}.png`;
+    a.click();
+  };
+
   // Handle user question in conversational mode - MULTI-AGENT
   const handleAskQuestion = async (question) => {
     if (!question.trim() || serverStatus !== 'ready' || isLoading) return;
@@ -2497,6 +2510,25 @@ const App = () => {
                     padding: '16px',
                     position: 'relative'
                   }}>
+                    <button
+                      onClick={() => downloadChartAsPNG(chart.id)}
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '48px',
+                        height: '28px',
+                        padding: '0 10px',
+                        borderRadius: '6px',
+                        border: `1px solid ${theme.cardBorder}`,
+                        background: theme.cardBg,
+                        color: theme.text,
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}
+                      title="Save this chart as a PNG"
+                    >
+                      Save PNG
+                    </button>
                     {/* Delete button */}
                     <button
                       onClick={() => deleteChart(chart.id)}
@@ -2538,6 +2570,7 @@ const App = () => {
                         option={{...chart.options, title: { ...chart.options.title, show: false }}}
                         style={{ height: '250px', width: '100%' }}
                         opts={{ renderer: 'canvas' }}
+                        onChartReady={(instance) => { chartRefs.current[chart.id] = instance; }}
                       />
                     )}
                   </div>
@@ -3134,6 +3167,22 @@ const App = () => {
                       {chart.chartType}
                     </span>
                     <button
+                      onClick={() => downloadChartAsPNG(chart.id)}
+                      style={{
+                        height: '24px',
+                        padding: '0 8px',
+                        borderRadius: '6px',
+                        border: `1px solid ${theme.cardBorder}`,
+                        background: theme.cardBg,
+                        color: theme.text,
+                        cursor: 'pointer',
+                        fontSize: '11px'
+                      }}
+                      title="Save this chart as a PNG"
+                    >
+                      Save PNG
+                    </button>
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteChart(chart.id);
@@ -3172,6 +3221,7 @@ const App = () => {
                     option={{...chart.options, title: { ...chart.options.title, show: false }}}
                     style={{ height: `calc(${chartHeight} - 60px)`, width: '100%' }}
                     opts={{ renderer: 'canvas' }}
+                        onChartReady={(instance) => { chartRefs.current[chart.id] = instance; }}
                   />
                 )}
               </div>
