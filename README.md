@@ -138,3 +138,34 @@ Santhosh Chakilam
 - Apache ECharts for visualization library
 - React and Vite communities
 
+
+## Save Chart as PNG
+
+New in this update: every generated chart now has a **Save PNG** button
+next to its delete button, in both the preview grid and the dashboard
+grid.
+
+- Click **Save PNG** on a chart to download that chart as a PNG file
+  named after the chart (for example `chart-1234567890.png`).
+- The download uses the chart's rendered ECharts instance
+  (`getDataURL` with a white background), so the PNG matches what
+  is shown on screen. A chart must have rendered once before its
+  button can download it.
+
+## Demo / Screenshots
+
+There is no public deployed demo linked from this repository, so the
+screenshots below are placeholders for what to capture after a local
+run: upload a CSV, ask a question in plain English, and capture the
+generated chart and chat answer.
+
+- Screenshot 1: data upload and column summary.
+- Screenshot 2: a generated bar or line chart with its Save PNG button.
+- Screenshot 3: the chat answer that produced the chart.
+
+## Deployment caveat
+
+No deployment is published from this repo. Run it locally as described
+under Installation (frontend on `http://localhost:5173` with the
+backend on port 3001), and keep your OpenAI API key in a local `.env`
+file only, never committed.
