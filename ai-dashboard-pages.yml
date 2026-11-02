@@ -1,0 +1,48 @@
+name: Deploy frontend to GitHub Pages
+
+# FRONTEND ONLY on GitHub Pages. The Express server, GPT-4 querying,
+# and any /api proxy do NOT run here. Pages serves static files only.
+# File upload, local SQLite via sql.js, charts, and PNG export in the
+# browser are the parts that can work without the server.
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build frontend for Pages subpath
+        run: npm run build -- --base=/AI-Dashboard-Agent/
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
